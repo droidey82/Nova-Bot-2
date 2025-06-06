@@ -12,7 +12,7 @@ app.get('/api/fresh-funded', async (req, res) => {
     const response = await fetch('https://public-api.birdeye.so/public/tokenlist');
     const data = await response.json();
 
-    const filtered = data.data
+    const filtered = data.tokens
       .filter(p => p.volume_usd_24h > 20000)
       .slice(0, 10)
       .map(p => ({
