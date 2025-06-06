@@ -1,6 +1,4 @@
-
 {
-  {
   "name": "dexscreener-proxy",
   "version": "1.0.0",
   "main": "server.js",
@@ -12,5 +10,4 @@
     "node-fetch": "^2.6.1",
     "cors": "^2.8.5"
   }
-}
 }
