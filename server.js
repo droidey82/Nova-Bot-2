@@ -1,26 +1,34 @@
-const express = require("express");
-const fetch = require("node-fetch");
-const cors = require("cors");
-
+const express = require('express');
+const fetch = require('node-fetch');
 const app = express();
-app.use(cors());
+const port = process.env.PORT || 3000;
 
-app.get("/api/fresh-funded", async (req, res) => {
+app.use((req, res, next) => {
+  // Allow all origins, or replace '*' with your domain for stricter security
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
+app.get('/api/fresh-funded', async (req, res) => {
   try {
-    const apiUrl = "https://onchain-0cdba6d4ed17.herokuapp.com/api-v1/fresh-funded";
-    const response = await fetch(apiUrl);
-    const data = await response.text();
-
-    res.status(response.status);
-    res.set("Content-Type", response.headers.get("content-type") || "application/json");
-    res.send(data);
+    const response = await fetch('https://onchain-0cdba6d4ed17.herokuapp.com/api-v1/fresh-funded', {
+      method: 'GET',
+      headers: {
+        // Add any headers if needed, e.g. Authorization
+      }
+    });
+    if (!response.ok) {
+      return res.status(response.status).send(`Error fetching API: ${response.statusText}`);
+    }
+    const data = await response.json();
+    res.json(data);
   } catch (error) {
-    console.error("Proxy error:", error);
-    res.status(500).json({ error: "Proxy fetch failed", details: error.message });
+    console.error('Error fetching fresh-funded:', error);
+    res.status(500).send('Internal server error');
   }
 });
 
-const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`✅ Solana Token API live on port ${port}`);
+  console.log(`Proxy server running on port ${port}`);
 });
