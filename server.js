@@ -5,31 +5,40 @@ const fetch = require('node-fetch');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Enable CORS
 app.use(cors());
 
 app.get('/api/fresh-funded', async (req, res) => {
   try {
-    const response = await fetch('https://public-api.birdeye.so/public/combined/trending');
+    const response = await fetch('https://public-api.birdeye.so/defi/tokenlist', {
+      headers: {
+        'x-api-key': process.env.BIRDEYE_API_KEY
+      }
+    });
+
     const data = await response.json();
+    console.log('✅ Birdeye tokenlist received:', JSON.stringify(data, null, 2));
 
-    console.log('🧪 Trending tokens:', JSON.stringify(data, null, 2));
-
-    const fresh = data.data?.newTokens?.slice(0, 10).map(token => ({
-      name: token.name,
-      symbol: token.symbol,
-      price: parseFloat(token.price).toFixed(5),
-      volume: Math.round(token.volume_usd_24h),
-      liquidity: Math.round(token.liquidity_usd)
-    }));
+    // Filter only Solana tokens with liquidity and price
+    const tokens = data.data
+      ?.filter(t => t.chain === 'solana' && t.liquidity && t.price)
+      .slice(0, 15)
+      .map(t => ({
+        name: t.name,
+        symbol: t.symbol,
+        price: parseFloat(t.price).toFixed(5),
+        liquidity: Math.round(t.liquidity),
+        volume: Math.round(t.volume_usd_24h || 0)
+      }));
 
     res.json({
-      message: '✅ Trending Solana tokens from Birdeye',
-      tokens: fresh || []
+      message: '✅ Solana tokens from Birdeye',
+      tokens: tokens || []
     });
 
   } catch (err) {
-    console.error('Birdeye trending fetch failed:', err);
-    res.status(500).json({ error: 'Failed to fetch trending tokens' });
+    console.error('❌ Birdeye fetch failed:', err);
+    res.status(500).json({ error: 'Failed to fetch from Birdeye' });
   }
 });
 
