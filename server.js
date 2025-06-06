@@ -3,13 +3,10 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Enable CORS for all origins
 app.use(cors());
 
-// Main API route for extension fetch
 app.get('/api/fresh-funded', async (req, res) => {
   try {
-    // 🔧 Replace this placeholder with real logic later
     res.json({
       message: '✅ API is live',
       tokens: [
@@ -23,12 +20,10 @@ app.get('/api/fresh-funded', async (req, res) => {
   }
 });
 
-// Fallback for unknown routes
 app.use((req, res) => {
   res.status(404).send('Route not found');
 });
 
-// Start the server
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
