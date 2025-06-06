@@ -9,32 +9,34 @@ app.use(cors());
 
 app.get('/api/fresh-funded', async (req, res) => {
   try {
-    const response = await fetch('https://public-api.birdeye.so/public/tokenlist');
-
-    // Attempt to parse JSON
+    const response = await fetch('https://public-api.birdeye.so/public/combined/trending');
     const data = await response.json();
 
-    // DEBUG: Log the full response
-    console.log('🧪 Raw Birdeye response:', JSON.stringify(data, null, 2));
+    console.log('🧪 Trending tokens:', JSON.stringify(data, null, 2));
 
-    // Send raw response to browser too
+    const fresh = data.data?.newTokens?.slice(0, 10).map(token => ({
+      name: token.name,
+      symbol: token.symbol,
+      price: parseFloat(token.price).toFixed(5),
+      volume: Math.round(token.volume_usd_24h),
+      liquidity: Math.round(token.liquidity_usd)
+    }));
+
     res.json({
-      message: '✅ Birdeye API Raw Response',
-      raw: data
+      message: '✅ Trending Solana tokens from Birdeye',
+      tokens: fresh || []
     });
 
   } catch (err) {
-    console.error('Birdeye fetch failed:', err);
-    res.status(500).json({ error: 'Failed to fetch from Birdeye' });
+    console.error('Birdeye trending fetch failed:', err);
+    res.status(500).json({ error: 'Failed to fetch trending tokens' });
   }
 });
 
-// Fallback for unknown routes
 app.use((req, res) => {
   res.status(404).send('Route not found');
 });
 
-// Start server
 app.listen(PORT, () => {
   console.log(`✅ Solana Token API live on port ${PORT}`);
 });
