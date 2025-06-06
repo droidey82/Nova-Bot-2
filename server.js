@@ -3,42 +3,42 @@ const cors = require('cors');
 const fetch = require('node-fetch');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
-// Enable CORS
+// 🔐 Hardcoded Birdeye API key (for testing only)
+const API_KEY = 'd8a70f437fdf4ffd9dbedfab89d79537';
+
 app.use(cors());
 
 app.get('/api/fresh-funded', async (req, res) => {
   try {
-    const response = await fetch('https://public-api.birdeye.so/defi/tokenlist', {
+    const response = await fetch('https://public-api.birdeye.so/defi/tokenlist?chain=solana', {
       headers: {
-        'x-api-key': process.env.BIRDEYE_API_KEY
+        'X-API-KEY': API_KEY
       }
     });
 
     const data = await response.json();
-    console.log('✅ Birdeye tokenlist received:', JSON.stringify(data, null, 2));
+    console.log("🧪 Raw Birdeye response:", data);
 
-    // Filter only Solana tokens with liquidity and price
-    const tokens = data.data
-      ?.filter(t => t.chain === 'solana' && t.liquidity && t.price)
-      .slice(0, 15)
-      .map(t => ({
-        name: t.name,
-        symbol: t.symbol,
-        price: parseFloat(t.price).toFixed(5),
-        liquidity: Math.round(t.liquidity),
-        volume: Math.round(t.volume_usd_24h || 0)
-      }));
+    if (!data.tokens || !Array.isArray(data.tokens)) {
+      return res.status(500).json({ error: 'Unexpected Birdeye response format' });
+    }
 
-    res.json({
-      message: '✅ Solana tokens from Birdeye',
-      tokens: tokens || []
-    });
+    // Filter tokens with 24h volume > 20k
+    const filtered = data.tokens.filter(p => p.volume_24h && p.volume_24h > 20000);
 
+    // Return top 10 tokens with minimal fields
+    const results = filtered.slice(0, 10).map(p => ({
+      name: p.name,
+      symbol: p.symbol,
+      price: p.price_usd
+    }));
+
+    res.json({ tokens: results });
   } catch (err) {
-    console.error('❌ Birdeye fetch failed:', err);
-    res.status(500).json({ error: 'Failed to fetch from Birdeye' });
+    console.error("Birdeye fetch failed:", err);
+    res.status(500).json({ error: 'Failed to fetch token data' });
   }
 });
 
