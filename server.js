@@ -22,5 +22,5 @@ app.get("/api/fresh-funded", async (req, res) => {
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`CORS proxy running on port ${port}`);
+  console.log(`✅ Solana Token API live on port ${port}`);
 });
