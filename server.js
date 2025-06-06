@@ -10,30 +10,31 @@ app.use(cors());
 app.get('/api/fresh-funded', async (req, res) => {
   try {
     const response = await fetch('https://public-api.birdeye.so/public/tokenlist');
+
+    // Attempt to parse JSON
     const data = await response.json();
 
-    const filtered = data.tokens
-      .filter(p => p.volume_usd_24h > 20000)
-      .slice(0, 10)
-      .map(p => ({
-        name: p.name,
-        symbol: p.symbol,
-        price: parseFloat(p.price).toFixed(5),
-        volume: Math.round(p.volume_usd_24h),
-        liquidity: Math.round(p.liquidity_usd)
-      }));
+    // DEBUG: Log the full response
+    console.log('🧪 Raw Birdeye response:', JSON.stringify(data, null, 2));
 
-    res.json({ message: '✅ Birdeye data', tokens: filtered });
+    // Send raw response to browser too
+    res.json({
+      message: '✅ Birdeye API Raw Response',
+      raw: data
+    });
+
   } catch (err) {
     console.error('Birdeye fetch failed:', err);
     res.status(500).json({ error: 'Failed to fetch from Birdeye' });
   }
 });
 
+// Fallback for unknown routes
 app.use((req, res) => {
   res.status(404).send('Route not found');
 });
 
+// Start server
 app.listen(PORT, () => {
   console.log(`✅ Solana Token API live on port ${PORT}`);
 });
