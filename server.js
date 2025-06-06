@@ -1,23 +1,25 @@
-// server.js
-
 const express = require('express');
 const cors = require('cors');
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-// Allow CORS for all origins
+// Enable CORS for all origins
 app.use(cors());
 
-// Simple GET route for /api/fresh-funded
+// Main API route for extension fetch
 app.get('/api/fresh-funded', async (req, res) => {
   try {
-    // TODO: Replace this with actual DexScreener fetch logic
+    // 🔧 Replace this placeholder with real logic later
     res.json({
-      message: 'API working ✅',
-      tokens: [] // Placeholder token list
+      message: '✅ API is live',
+      tokens: [
+        { name: "MemeCoinX", symbol: "MCX", price: 0.0021 },
+        { name: "SolPumper", symbol: "PUMP", price: 0.0049 }
+      ]
     });
   } catch (err) {
-    console.error('API error:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("API error:", err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
@@ -27,7 +29,6 @@ app.use((req, res) => {
 });
 
 // Start the server
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`✅ Server running on port ${PORT}`);
 });
