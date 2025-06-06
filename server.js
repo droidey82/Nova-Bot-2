@@ -1,24 +1,33 @@
+// server.js
 
-const express = require("express");
-const fetch = require("node-fetch");
+const express = require('express');
+const cors = require('cors');
 const app = express();
 
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  next();
-});
+// Allow CORS for all origins
+app.use(cors());
 
-app.get("/dex", async (req, res) => {
+// Simple GET route for /api/fresh-funded
+app.get('/api/fresh-funded', async (req, res) => {
   try {
-    const response = await fetch("https://api.dexscreener.com/latest/dex/pairs");
-    const data = await response.json();
-    res.json(data);
+    // TODO: Replace this with actual DexScreener fetch logic
+    res.json({
+      message: 'API working ✅',
+      tokens: [] // Placeholder token list
+    });
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch from DexScreener", details: err.toString() });
+    console.error('API error:', err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
+// Fallback for unknown routes
+app.use((req, res) => {
+  res.status(404).send('Route not found');
+});
+
+// Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Proxy server listening on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
